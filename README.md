@@ -14,10 +14,10 @@ Fake Lossless Audio Detector
 
 Audio: AAC downloaded from YouTube  
 Post-processing: EmiyaEngine  
-Spectrum:
-![Spectrum](https://imgur.com/Inw3oPm.png)
-Lossless Audio Checker (not work):
-![LosslessAudioChecker](https://imgur.com/5gugaLb.png)
+Spectrum:  
+![Spectrum](https://imgur.com/Inw3oPm.png)  
+Lossless Audio Checker (not work):  
+![LosslessAudioChecker](https://imgur.com/5gugaLb.png)  
 Ours:  
 ![Ours](https://imgur.com/uwI72Jc.png)
 
