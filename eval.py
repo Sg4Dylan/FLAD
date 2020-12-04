@@ -1,3 +1,4 @@
+import sys
 from librosa.core import spectrum
 import numpy as np
 from PIL import Image
@@ -35,7 +36,7 @@ class FLAD:
     def init_model(self):
         self.session_opti = onnxruntime.SessionOptions()
         self.session_opti.enable_mem_pattern = False
-        self.provider = 'DmlExecutionProvider' # or CpuExecutionProvider
+        self.provider = 'CPUExecutionProvider' # or DmlExecutionProvider
         self.session = onnxruntime.InferenceSession(self.model_path, self.session_opti)
         self.session.set_providers([self.provider])
         self.model_input = self.session.get_inputs()[0].name
@@ -53,11 +54,18 @@ class FLAD:
         utils.get_spectrum(y_s, 0, 'temp', max=20)
         spectrum_list = utils.get_file_list('temp')
         print('Valid samples...')
+        fin = np.zeros(4)
         for i_idx in range(len(spectrum_list)):
             norm_img = self.img_preprocess(spectrum_list[i_idx])
             result = self.session.run([], {self.model_input: norm_img})[0][0]
             result = softmax(result)
+            fin[np.argmax(result)] += 1
             print(f'Sample {i_idx+1} -> {self.r_map[np.argmax(result)]}, Prob：{np.max(result)*100:.3f}%')
+        if fin[0] != len(spectrum_list):
+            fin[0] = 0
+            print(f'Final result: {self.r_map[np.argmax(fin)]}')
+        else:
+            print('Final result: Lossless')
 
 flad = FLAD()
-flad.get_result('fake.flac')
+flad.get_result(sys.argv[1])

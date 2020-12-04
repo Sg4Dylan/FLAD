@@ -8,15 +8,19 @@ from dataset import FLADS
 lr = 3e-4
 batch = 32
 epoch = 10
-device = torch.device("cpu")
-ds_path = ''
+device = torch.device('cuda')
+ds_path = ['/home/FLAD_Dataset/noise', '/home/FLAD_Dataset/origin']
 
 train_ds = FLADS(ds_path)
-train_loader = DataLoader(train_ds, batch_size=batch, shuffle=True, 
-                          num_workers=1, pin_memory=True)
+train_loader = DataLoader(train_ds, batch_size=batch, shuffle=True,
+                             num_workers=1, pin_memory=True)
 
 # heads for: Lossless, AAC, MP3, Opus
 model = EfficientNet.from_pretrained('efficientnet-b0', num_classes=4)
+model = torch.nn.DataParallel(model, device_ids=None).cuda()
+# load weights
+model.load_state_dict(torch.load('save/model_fin.pth'))
+
 model.train()
 optimizer = torch.optim.Adam(model.parameters(), lr)
 
@@ -25,9 +29,6 @@ loss = torch.nn.CrossEntropyLoss()
 
 # plot
 liveloss = PlotLosses()
-
-# load weights
-model.load_state_dict(torch.load('save/model_fin.pth'))
 
 # train loop
 for ep in range(epoch):
@@ -40,8 +41,8 @@ for ep in range(epoch):
         batch_y = batch_y.to(device)
 
         optimizer.zero_grad()
-        predict_mag = model(batch_x)
-        p_loss = loss(batch_x, batch_y)
+        predict = model(batch_x)
+        p_loss = loss(predict, batch_y)
         p_loss_v = p_loss.item()
         p_loss.backward()
         optimizer.step()

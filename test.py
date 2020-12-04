@@ -2,15 +2,14 @@ import torch
 from torch.utils.data import DataLoader
 from efficientnet_pytorch import EfficientNet
 from dataset import FLADS
-from tqdm import tqdm
 import multiprocessing
 
 
 lr = 3e-4
 batch = 32
 epoch = 10
-device = torch.device("cpu")
-ds_path = '/home/FLAD_Dataset'
+device = torch.device('cuda')
+ds_path = ['/home/FLAD_Dataset/noise', '/home/FLAD_Dataset/origin']
 
 
 def test():
@@ -23,10 +22,8 @@ def test():
     model.eval()
     optimizer = torch.optim.Adam(model.parameters(), lr)
 
-    # loss
-    loss = torch.nn.CrossEntropyLoss()
-
     # load weights
+    model = torch.nn.DataParallel(model, device_ids=None).cuda()
     model.load_state_dict(torch.load('save/model_fin.pth', map_location=device))
 
     # test loop
@@ -36,7 +33,7 @@ def test():
         num_samples = 0
         
 
-        for it, (batch_x, batch_y) in tqdm(enumerate(train_loader), ascii=True):
+        for it, (batch_x, batch_y) in enumerate(train_loader):
 
             batch_x = batch_x.to(device)
             batch_y = batch_y.to(device)
@@ -47,13 +44,7 @@ def test():
             num_correct += (predictions == batch_y).sum()
             num_samples += predictions.size(0)
 
-            false_label = []
-            for i in range(len(batch_y)):
-                if predictions[i] != batch_y[i]:
-                    false_label.append(batch_y[i].detach(). numpy())
-            print(false_label)
-
-            print(f'already tested: {num_samples}, correct: {num_correct}')
+            print(f'already tested: {num_samples}, acc: {100*num_correct/num_samples:.3f} %')
 
 
 if __name__ == '__main__':
