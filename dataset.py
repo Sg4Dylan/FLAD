@@ -15,7 +15,9 @@ class FLADS(Dataset):
 
 
     def load(self):
-        self.ds_list = get_file_list(self.ds_root)
+        for ds in self.ds_root:
+            for i in get_file_list(ds):
+                self.ds_list.append(i)
         for i in self.ds_list:
             if 'LL' in i:
                 self.ds_label.append(0)
