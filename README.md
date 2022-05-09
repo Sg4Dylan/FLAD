@@ -51,9 +51,8 @@ generate dataset:
 
 ```
 # set input & output path  
-audio_root = '/home/audio'  
-ds_root = '/home/FLAD_Dataset/noise'  
-ds_test = '/home/FLAD_Dataset/origin'
+audio_root = './music'
+ds_root = './dataset'
 ```
 then `python generate.py`  
 

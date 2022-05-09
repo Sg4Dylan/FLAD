@@ -17,7 +17,7 @@ def get_stft(y_s, n_fft=2048):
     return librosa.stft(np.asfortranarray(y_s), n_fft=n_fft)
 
 
-def get_spectrum(y_s, fid, root, t_sr=48000, n_fft=512, max=-1):
+def get_spectrum(y_s, fid, root, t_sr=48000, n_fft=512, max=-1, noise=None):
     fig_dpi = 100
     fig_size = (800/fig_dpi, 800/fig_dpi)
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=fig_size)
@@ -29,6 +29,9 @@ def get_spectrum(y_s, fid, root, t_sr=48000, n_fft=512, max=-1):
     clip_len = t_sr * 2
     dn_f, up_f = 2400, 20000
     dn_th, up_th = round(n_fft*dn_f/t_sr), round(n_fft*up_f/t_sr)
+    # Add noise (for generate dataset)
+    if noise is not None:
+        y_s = add_noise(y_s, noise[0], noise[1])
     # Render images
     cnt = 1
     for i in range(0, len(y_s), clip_len):
@@ -63,3 +66,9 @@ def get_file_list(target_root, ext=None):
                     continue
             file_path_list.append(os.path.join(root, name))
     return file_path_list
+
+
+def add_noise(y_s, sv_l=0.002,sv_h=0.01):
+    # AkkoMode like
+    jitter_vector = np.random.uniform(low=sv_l, high=sv_h, size=y_s.shape)+1
+    return y_s*jitter_vector

@@ -5,9 +5,10 @@ import utils
 
 
 select_cnt = 50
-audio_root = '/home/music'
-ds_root = '/home/FLAD_Dataset/noise'
-ds_test = '/home/FLAD_Dataset/origin'
+audio_root = './music'
+ds_root = './dataset'
+ds_noise = f'{ds_root}/noise'
+ds_test = f'{ds_root}/origin'
 ext = ['flac', 'opus', 'aac', 'mp3']
 cls = ['LL', 'OPUS', 'AAC', 'MP3']
 
@@ -25,7 +26,11 @@ def generate():
     target_list = utils.get_file_list(audio_root, 'flac')
     random.shuffle(target_list)
     target_list = target_list[:select_cnt]
-
+    
+    for i in cls:
+        os.makedirs(f'{ds_noise}/{i}', exist_ok=True)
+        os.makedirs(f'{ds_test}/{i}', exist_ok=True)
+    
     for idx, i in enumerate(target_list):
         o_path = i.replace('\\', '/')
         os.system(f'ffmpeg -i "{o_path}" -map 0:a -af aresample=resampler=soxr -ar 48000 "{ds_root}/temp.flac"')
@@ -34,8 +39,8 @@ def generate():
         
         job = []
         for i in range(len(ext)):
-            job.append(Process(target=do, args=(f'{ds_root}/temp.{ext[i]}', f'{ds_root}/cls[i]', idx,)))
-            job.append(Process(target=do, args=(f'{ds_root}/temp.{ext[i]}', f'{ds_test}/cls[i]', idx, True,)))
+            job.append(Process(target=do, args=(f'{ds_root}/temp.{ext[i]}', f'{ds_noise}/{cls[i]}', idx,)))
+            job.append(Process(target=do, args=(f'{ds_root}/temp.{ext[i]}', f'{ds_test}/{cls[i]}', idx, True,)))
         
         for i in job:
             i.start()
@@ -48,4 +53,3 @@ def generate():
 if __name__ == '__main__':
     freeze_support()
     generate()
-
