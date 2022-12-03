@@ -17,7 +17,7 @@ class FLAD:
 
     def img_preprocess(self, image_path):
         try:
-            img = Image.open(image_path).resize((self.img_size, self.img_size),Image.BICUBIC)
+            img = Image.open(image_path).resize((self.img_size, self.img_size), Image.Resampling.BICUBIC)
             img = img.convert('RGBA').convert('RGB')
         except OSError:
             print(f'\nFile broken: {image_path}')
@@ -37,7 +37,7 @@ class FLAD:
         self.session_opti = onnxruntime.SessionOptions()
         self.session_opti.enable_mem_pattern = False
         self.provider = 'CPUExecutionProvider' # or DmlExecutionProvider
-        self.session = onnxruntime.InferenceSession(self.model_path, self.session_opti)
+        self.session = onnxruntime.InferenceSession(self.model_path, self.session_opti, providers=["CPUExecutionProvider"])
         self.session.set_providers([self.provider])
         self.model_input = self.session.get_inputs()[0].name
     
