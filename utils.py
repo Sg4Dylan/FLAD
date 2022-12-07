@@ -61,6 +61,8 @@ def get_file_list(target_root, ext=None):
     file_path_list = []
     for root, dirs, files in os.walk(target_root):
         for name in files:
+            if name.startswith('.'):
+                continue
             if ext is not None:
                 if not name.endswith(ext):
                     continue
